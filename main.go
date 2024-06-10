@@ -3,14 +3,12 @@ package main
 import (
     "log"
     "net/http"
-    "os"
 
     "github.com/joho/godotenv"
 
     "auth-app/db"
     "auth-app/handlers"
     "auth-app/middleware"
-    "auth-app/utils"
 )
 
 func main() {
@@ -19,9 +17,6 @@ func main() {
     if err != nil {
         log.Fatal("Error loading .env file")
     }
-
-    // Set the JWT secret key from environment variable
-    utils.JWTKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 
     db.InitDB()
 

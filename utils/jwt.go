@@ -2,9 +2,9 @@ package utils
 
 import (
     "time"
+    "os"
 
     "github.com/dgrijalva/jwt-go"
-    "os"
 )
 
 var JWTKey []byte

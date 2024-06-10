@@ -26,3 +26,6 @@ client_secret*.json
 
 # environ file
 .env
+
+# test db
+test.db

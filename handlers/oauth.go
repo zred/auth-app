@@ -5,6 +5,12 @@ import (
     "encoding/json"
     "net/http"
     "os"
+    "log"
+    "time"
+
+    "auth-app/db"
+    "auth-app/models"
+    "auth-app/utils"
 
     "golang.org/x/oauth2"
     "golang.org/x/oauth2/google"
@@ -52,7 +58,30 @@ func OAuthGoogleCallback(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Here you would typically check if the user exists in your DB and create a session or JWT
-    // For simplicity, we will just return the email
+    var user models.User
+    if err := db.DB.Where("email = ?", userInfo.Email).First(&user).Error; err != nil {
+        user = models.User{
+            Email: userInfo.Email,
+        }
+        if err := db.DB.Create(&user).Error; err != nil {
+            http.Error(w, "Failed to register user", http.StatusInternalServerError)
+            return
+        }
+    }
+
+    log.Println("OAuth2 login successful:", userInfo.Email)
+    jwtToken, err := utils.GenerateJWT(user.Email)
+    if err != nil {
+        http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+        return
+    }
+
+    http.SetCookie(w, &http.Cookie{
+        Name:     "token",
+        Value:    jwtToken,
+        Expires:  time.Now().Add(24 * time.Hour),
+        HttpOnly: true,
+    })
+
     w.Write([]byte("User Info: " + userInfo.Email))
 }
